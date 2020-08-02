@@ -17,9 +17,9 @@ int main(int argc, char* args[])
 
     getcwd(directoryPath, sizeof(directoryPath));
 
-    for (int i = 0; i<argc; i++){
-        printf("length is: %d - %s\n", i, args[i]);
-    }
+    // for (int i = 0; i<argc; i++){
+    //     printf("length is: %d - %s\n", i, args[i]);
+    // }
 
     // for (int j = 1; j < argc; j++){
     //     printf("args are: %s\n", args[j]);
@@ -28,15 +28,18 @@ int main(int argc, char* args[])
 
 
     if (args[1] == NULL && argc == 1){
-        printf("path: %s\n\n", directoryPath);
+        // printf("path: %s\n\n", directoryPath);
         normalLs(directoryPath);
+
     }
 
-    if (args[1][1] == 'l'){
+    if ( argc == 2 && args[1][0]){
+        if(args[1][1] == 'l'){
         // printf("HI");
         optionLi(directoryPath);
         // printf("path: %s\n\n", directoryPath);
         // normalLs(directoryPath);
+        }
     }
 
 

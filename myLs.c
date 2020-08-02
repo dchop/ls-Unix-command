@@ -41,7 +41,7 @@ void normalLs(char *directory){
 	struct dirent * entry;
 
 	dir = opendir(directory);
-    char str[10][50], temp[50];
+    // char str[10][50], temp[50];
     // int i = 0;
 
 
@@ -155,7 +155,7 @@ void biggestEntry(char *directory){
 }
 
 void printPermissions(__mode_t newMode){
-    printf((newMode & S_IRUSR) ? "r" : "-");
+    // printf((newMode & S_IRUSR) ? "r" : "-");
     // printf("HI");
     if ((newMode & S_IRUSR) == S_IRUSR){
         printf("r");
@@ -209,7 +209,7 @@ void optionLi(char *directory){
     struct stat curStat;
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
-    char str[10][50], temp1[50];
+    // char str[10][50], temp1[50];
     int i =0;
     // int width1, width2 = biggestEntry(directory);
     // width1= 5;
@@ -246,21 +246,6 @@ void optionLi(char *directory){
     struct dirent **namelist;
     int n;
     n = scandir(directory, &namelist, 0, alphasort);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     for (int j = 0; j<n; j++){
     // if(dir != NULL){
