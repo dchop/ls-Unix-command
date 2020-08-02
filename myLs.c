@@ -13,11 +13,12 @@
 
 #include "myLs.h"
 
-// int alphasort_case_insensitive(const struct dirent ** a, const struct dirent **b) 
-// {
-//     return(strcasecmp((*(const struct dirent **)a)->d_name,
-//                 (*(const struct dirent **)b)->d_name));
-// }
+int alphasort_case_insensitive(const struct dirent ** a, const struct dirent **b) 
+{
+    return(strcasecmp((*(const struct dirent **)a)->d_name,
+                (*(const struct dirent **)b)->d_name));
+}
+int alphasort(const struct dirent **d1, const struct dirent **d2);
 
 static int width1 = 0;
 static int width2 = 0;
@@ -49,7 +50,13 @@ void normalLs(char *directory){
     char *path;
 
 
-    // n = scandir(directory, &namelist, 0, alphasort_case_insensitive);
+    n = scandir(directory, &namelist, 0, alphasort);
+    for (int i = 0; i<n; i++){
+        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                continue;
+            }
+        printf("%s\n", namelist[i]->d_name);
+    }
     // if (n < 0)
     //     perror("scandir");
     // else {
@@ -64,38 +71,38 @@ void normalLs(char *directory){
     //     }
     // free(namelist);
 
-	if (dir != NULL){
-		while (entry = readdir(dir)){
-            if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
-                continue;
-            }
-			// printf("%s  \n",entry->d_name);
-            strncpy(str[i], entry->d_name, 10);
-            i++;
-		}
+	// if (dir != NULL){
+	// 	while (entry = readdir(dir)){
+    //         if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+    //             continue;
+    //         }
+	// 		// printf("%s  \n",entry->d_name);
+    //         strncpy(str[i], entry->d_name, 10);
+    //         i++;
+	// 	}
 		
-		closedir(dir);
-	}	
-	else{
-		perror("Could not open the directory");
-	}
+	// 	closedir(dir);
+	// }	
+	// else{
+	// 	perror("Could not open the directory");
+	// }
 
-    // For printing in lexicographical order
+    // // For printing in lexicographical order
 
-    for(i=0;i<9;i++){
-        for(int j=i+1;j<10;j++){
-            if(strcmp(str[i],str[j])>0){
-                 strcpy(temp,str[i]); 
-                 strcpy(str[i],str[j]);
-                 strcpy(str[j],temp);
-            }
-        }
-    }
-    printf("\nIn lexicographical order: \n");
+    // for(i=0;i<9;i++){
+    //     for(int j=i+1;j<10;j++){
+    //         if(strcmp(str[i],str[j])>0){
+    //              strcpy(temp,str[i]); 
+    //              strcpy(str[i],str[j]);
+    //              strcpy(str[j],temp);
+    //         }
+    //     }
+    // }
+    // printf("\nIn lexicographical order: \n");
 
-    for(i=0;i<9;i++){
-        puts(str[i]);
-    }
+    // for(i=0;i<9;i++){
+    //     puts(str[i]);
+    // }
 }
 
 void biggestEntry(char *directory){
@@ -202,21 +209,68 @@ void optionLi(char *directory){
     struct stat curStat;
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
+    char str[10][50], temp1[50];
+    int i =0;
     // int width1, width2 = biggestEntry(directory);
     // width1= 5;
     // width2 = 1;
 
 
-    dir = opendir(directory);
+    // dir = opendir(directory);
+    // if (dir != NULL){
+	// 	while (entry = readdir(dir)){
+    //         if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+    //             continue;
+    //         }
+	// 		// printf("%s  \n",entry->d_name);
+    //         strncpy(str[i], entry->d_name, 10);
+    //         i++;
+	// 	}
+		
+	// 	closedir(dir);
+	// }	
+	// else{
+	// 	perror("Could not open the directory");
+	// }
 
-    if(dir != NULL){
-        while (entry = readdir(dir)){
-            if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+    //     for(i=0;i<9;i++){
+    //     for(int j=i+1;j<10;j++){
+    //         if(strcmp(str[i],str[j])>0){
+    //              strcpy(temp1,str[i]); 
+    //              strcpy(str[i],str[j]);
+    //              strcpy(str[j],temp1);
+    //         }
+    //     }
+    // }
+
+    struct dirent **namelist;
+    int n;
+    n = scandir(directory, &namelist, 0, alphasort);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    for (int j = 0; j<n; j++){
+    // if(dir != NULL){
+    //     while (entry = readdir(dir)){
+            if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
                 continue;
             }
             strcat(temp, directory);
             strcat(temp, "/");
-            strcat(temp, entry->d_name);
+            strcat(temp, namelist[j]->d_name);
             stat(temp, &curStat);
             curTimer = curStat.st_mtime;
             newTime = localtime(&curTimer);
@@ -224,10 +278,9 @@ void optionLi(char *directory){
             grp = getgrgid(curStat.st_gid);
             printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
             printPermissions(curStat.st_mode);
-            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, entry->d_name );
+            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
             strcpy(temp, "");
 
         }
         closedir(dir);
-    }
 }   
