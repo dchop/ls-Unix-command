@@ -22,6 +22,7 @@ int alphasort(const struct dirent **d1, const struct dirent **d2);
 
 static int width1 = 0;
 static int width2 = 0;
+static int maxNodeCount = 0;
 
 int checkHidden(char *name){
     if(!strcmp(name, ".") || !strcmp(name, ".")){
@@ -111,10 +112,12 @@ void biggestEntry(char *directory){
     int maxCount = 0;
     int maxScount = 0;
     char newSize[50];
+    char maxNode[50];
     char newStringSize[50];
     struct dirent * entry;
     struct stat allStat;
     char wholeDir[4096];
+
 
     dir = opendir(directory);
 
@@ -124,12 +127,20 @@ void biggestEntry(char *directory){
                 continue;
             }
             int counter = 0;
+            int currNodeCount = 0;
             int stringCount = 0;
             strcat(wholeDir, directory);
             strcat(wholeDir, "/");
             strcat(wholeDir, entry->d_name);
             stat(wholeDir, &allStat);
             sprintf(newSize, "%ld", allStat.st_size);
+            sprintf(maxNode, "%ld", allStat.st_ino);
+            for (int i = 0; i < strlen(maxNode); i++){
+                currNodeCount++;
+                if(maxNodeCount < currNodeCount){
+                    maxNodeCount = currNodeCount;
+                }
+            }
             for(int i = 0; i< strlen(newSize); i++){
                 counter++;
                 if (maxCount < counter){
@@ -197,7 +208,7 @@ void printPermissions(__mode_t newMode){
     else {printf("-");}
 }
 
-void optionLi(char *directory){
+void optionL(char *directory, char *options){
     DIR * dir;
     char temp[4096];
     struct dirent *entry;
@@ -211,6 +222,26 @@ void optionLi(char *directory){
     biggestEntry(directory);
     // char str[10][50], temp1[50];
     int i =0;
+
+    struct dirent **namelist;
+    int n;
+    n = scandir(directory, &namelist, 0, alphasort);
+
+    if (strcmp(options, "i") == 0){
+
+
+        for (int j = 0; j<n; j++){
+                if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
+                    continue;
+                }
+                strcat(temp, directory);
+                strcat(temp, "/");
+                strcat(temp, namelist[j]->d_name);
+                stat(temp, &curStat);
+                printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
+                strcpy(temp, "");
+            }
+    }
     // int width1, width2 = biggestEntry(directory);
     // width1= 5;
     // width2 = 1;
@@ -243,11 +274,12 @@ void optionLi(char *directory){
     //     }
     // }
 
-    struct dirent **namelist;
-    int n;
-    n = scandir(directory, &namelist, 0, alphasort);
+    // struct dirent **namelist;
+    // int n;
+    // n = scandir(directory, &namelist, 0, alphasort);
 
-    for (int j = 0; j<n; j++){
+    else if (strcmp(options, "l") == 0){
+        for (int j = 0; j<n; j++){
     // if(dir != NULL){
     //     while (entry = readdir(dir)){
             if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
@@ -267,5 +299,30 @@ void optionLi(char *directory){
             strcpy(temp, "");
 
         }
+    }
+
+    else if (strcmp(options, "il") == 0){
+            for (int j = 0; j<n; j++){
+    // if(dir != NULL){
+    //     while (entry = readdir(dir)){
+            if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
+                continue;
+            }
+            strcat(temp, directory);
+            strcat(temp, "/");
+            strcat(temp, namelist[j]->d_name);
+            stat(temp, &curStat);
+            curTimer = curStat.st_mtime;
+            newTime = localtime(&curTimer);
+            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+            grp = getgrgid(curStat.st_gid);
+            printf("%*ld ", maxNodeCount, curStat.st_ino);
+            printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+            printPermissions(curStat.st_mode);
+            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+            strcpy(temp, "");
+        }
+    }
         closedir(dir);
-}   
+}      
+

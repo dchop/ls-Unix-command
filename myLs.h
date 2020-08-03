@@ -8,7 +8,7 @@ void normalLs(char *directory);
 void biggestEntry(char *directory);
 void printPermissions(__mode_t newMode);
 
-void optionLi(char *directory);
+void optionL(char *directory, char *options);
 
 
 #endif
