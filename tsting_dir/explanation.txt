@@ -1,0 +1,15 @@
+# CMPT300_as04
+Virtual_Memory&UNIX_ls_cmd
+
+//// Author: Yu Xuan (Shawn) Wang
+//// Student #: 301227972
+//// Created on: Jul 7, 2017
+//// Last Modified: Jul , 2017
+//// Email: yxwang@sfu.ca
+
+This directory was built to test the ls cmd.
+
+It is designed to contain files of differentL: 
+1. priviledges
+2. groups
+3. owners

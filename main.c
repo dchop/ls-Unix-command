@@ -46,6 +46,18 @@ int main(int argc, char* args[])
             options = "i";
             optionL(directoryPath, options);
         }
+        else if(args[1][1] == 'R' && args[1][2] == NULL){
+            options = "R";
+            optionR(".", options);
+        }
+        else if((args[1][2] == 'R' && args[1][1] == 'i') || (args[1][2] == 'i' && args[1][1] == 'R')){
+            options = "iR";
+            optionR(".", options);
+        }
+        else if((args[1][2] == 'R' && args[1][1] == 'l') || (args[1][2] == 'l' && args[1][1] == 'R')){
+            options = "lR";
+            optionR(".", options);
+        }
         else if((args[1][2] == 'l' && args[1][1] == 'i') || (args[1][2] == 'i' && args[1][1] == 'l')){
             options = "il";
             optionL(directoryPath, options);

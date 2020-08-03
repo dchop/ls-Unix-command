@@ -39,7 +39,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/output",
-            "args": ["-li"],
+            "args": ["-R"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

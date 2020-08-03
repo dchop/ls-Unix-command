@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <pwd.h>	// For User id
 #include <grp.h>	// For Group id
+#include <errno.h>
+#include <libgen.h>     // basename()
 
 #include "myLs.h"
 
@@ -23,6 +25,8 @@ int alphasort(const struct dirent **d1, const struct dirent **d2);
 static int width1 = 0;
 static int width2 = 0;
 static int maxNodeCount = 0;
+
+static char currDir[4096];
 
 int checkHidden(char *name){
     if(!strcmp(name, ".") || !strcmp(name, ".")){
@@ -242,41 +246,6 @@ void optionL(char *directory, char *options){
                 strcpy(temp, "");
             }
     }
-    // int width1, width2 = biggestEntry(directory);
-    // width1= 5;
-    // width2 = 1;
-
-
-    // dir = opendir(directory);
-    // if (dir != NULL){
-	// 	while (entry = readdir(dir)){
-    //         if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
-    //             continue;
-    //         }
-	// 		// printf("%s  \n",entry->d_name);
-    //         strncpy(str[i], entry->d_name, 10);
-    //         i++;
-	// 	}
-		
-	// 	closedir(dir);
-	// }	
-	// else{
-	// 	perror("Could not open the directory");
-	// }
-
-    //     for(i=0;i<9;i++){
-    //     for(int j=i+1;j<10;j++){
-    //         if(strcmp(str[i],str[j])>0){
-    //              strcpy(temp1,str[i]); 
-    //              strcpy(str[i],str[j]);
-    //              strcpy(str[j],temp1);
-    //         }
-    //     }
-    // }
-
-    // struct dirent **namelist;
-    // int n;
-    // n = scandir(directory, &namelist, 0, alphasort);
 
     else if (strcmp(options, "l") == 0){
         for (int j = 0; j<n; j++){
@@ -303,8 +272,6 @@ void optionL(char *directory, char *options){
 
     else if (strcmp(options, "il") == 0){
             for (int j = 0; j<n; j++){
-    // if(dir != NULL){
-    //     while (entry = readdir(dir)){
             if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
                 continue;
             }
@@ -324,5 +291,52 @@ void optionL(char *directory, char *options){
         }
     }
         closedir(dir);
-}      
+} 
+
+
+void optionR(char *directory, char *options){
+    
+    printf("%s: \n", directory);
+
+    if(strcmp(options, "R") == 0){
+        normalLs(directory);
+    }
+    else if(strcmp(options, "iR") == 0){
+        optionL(directory, "i");
+    }
+    else if(strcmp(options, "lR") == 0){
+        optionL(directory, "l");
+    }
+    DIR *dir;
+    DIR *subDir;
+    int ret;
+    struct dirent *entry;
+    char wholeDir[4096];
+    dir = opendir(directory);
+    printf("\n");
+    strcpy(currDir, directory);
+    while((entry = readdir(dir)) != NULL){
+        if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+                continue;
+            }
+        if (entry->d_type == DT_DIR){
+        strcpy(wholeDir, directory);
+        strcat(wholeDir, "/");
+        strcat(wholeDir, entry->d_name);
+         if ((subDir = opendir(wholeDir)) == NULL) {
+                    ret = errno;
+                    fprintf(stderr, "Cannot open '%s': %s\n", entry->d_name, strerror(ret));
+                    return 0;
+            }
+        // print entries in subdir
+        optionR(wholeDir, options);
+        }
+        // if ((ret = optionR(wholeDir)) != 0) {
+        //     printf("UnixLs: cannot access '%s': %s",wholeDir,strerror(ret));
+        // }
+        
+
+    }
+    closedir(subDir);
+}
 
