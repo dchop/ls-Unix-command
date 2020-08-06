@@ -27,6 +27,8 @@ static int width2 = 0;
 static int maxNodeCount = 0;
 
 static char currDir[4096];
+static char rDir[10][50];
+static int k = 0;
 
 int checkHidden(char *name){
     if(!strcmp(name, ".") || !strcmp(name, ".")){
@@ -212,7 +214,7 @@ void printPermissions(__mode_t newMode){
     else {printf("-");}
 }
 
-void optionL(char *directory, char *options){
+void optionL(char *directory, int iCheck, int rCheck, int lCheck){
     DIR * dir;
     char temp[4096];
     struct dirent *entry;
@@ -231,46 +233,50 @@ void optionL(char *directory, char *options){
     int n;
     n = scandir(directory, &namelist, 0, alphasort);
 
-    if (strcmp(options, "i") == 0){
+    // if (strcmp(options, "i") == 0){
 
 
-        for (int j = 0; j<n; j++){
-                if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
-                    continue;
-                }
-                strcat(temp, directory);
-                strcat(temp, "/");
-                strcat(temp, namelist[j]->d_name);
-                stat(temp, &curStat);
-                printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
-                strcpy(temp, "");
-            }
-    }
+    //     for (int j = 0; j<n; j++){
+    //             if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
+    //                 continue;
+    //             }
+    //             strcat(temp, directory);
+    //             strcat(temp, "/");
+    //             strcat(temp, namelist[j]->d_name);
+    //             stat(temp, &curStat);
+    //             printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
+    //             strcpy(temp, "");
+    //         }
+    // }
 
-    else if (strcmp(options, "l") == 0){
-        for (int j = 0; j<n; j++){
-    // if(dir != NULL){
-    //     while (entry = readdir(dir)){
-            if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
-                continue;
-            }
-            strcat(temp, directory);
-            strcat(temp, "/");
-            strcat(temp, namelist[j]->d_name);
-            stat(temp, &curStat);
-            curTimer = curStat.st_mtime;
-            newTime = localtime(&curTimer);
-            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
-            grp = getgrgid(curStat.st_gid);
-            printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-            printPermissions(curStat.st_mode);
-            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
-            strcpy(temp, "");
+    // else if (strcmp(options, "l") == 0){
+    //     for (int j = 0; j<n; j++){
+    // // if(dir != NULL){
+    // //     while (entry = readdir(dir)){
+    //         if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
+    //             continue;
+    //         }
+    //         strcat(temp, directory);
+    //         strcat(temp, "/");
+    //         strcat(temp, namelist[j]->d_name);
+    //         stat(temp, &curStat);
+    //         curTimer = curStat.st_mtime;
+    //         newTime = localtime(&curTimer);
+    //         strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+    //         grp = getgrgid(curStat.st_gid);
+    //         printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+    //         printPermissions(curStat.st_mode);
+    //         printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+    //         strcpy(temp, "");
 
+    //     }
+    // }
+
+    // else if (strcmp(options, "il") == 0){
+        if(n != -1){
+            printf("%s: \n", directory);
         }
-    }
-
-    else if (strcmp(options, "il") == 0){
+        
             for (int j = 0; j<n; j++){
             if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
                 continue;
@@ -283,60 +289,384 @@ void optionL(char *directory, char *options){
             newTime = localtime(&curTimer);
             strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
             grp = getgrgid(curStat.st_gid);
-            printf("%*ld ", maxNodeCount, curStat.st_ino);
-            printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-            printPermissions(curStat.st_mode);
-            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
-            strcpy(temp, "");
+
+
+            if (iCheck == 1 && lCheck == 1){
+                printf("%*ld ", maxNodeCount, curStat.st_ino);
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                strcpy(temp, "");
+            }
+            else if (iCheck == 1){
+                    printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
+                    strcpy(temp, "");
+            }
+            else if (lCheck == 1){
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                strcpy(temp, "");
+            }
+            else{
+                printf("%s\n", namelist[j]->d_name);
+            }
+
         }
-    }
-        closedir(dir);
+        if ( n!=-1){
+                printf("\n");
+        }
+        
+        if (n == -1){
+            printSingleFile(directory, iCheck, rCheck, lCheck);
+        }
+    // }
+        // closedir(dir);
 } 
 
-
-void optionR(char *directory, char *options){
-    
-    printf("%s: \n", directory);
-
-    if(strcmp(options, "R") == 0){
-        normalLs(directory);
-    }
-    else if(strcmp(options, "iR") == 0){
-        optionL(directory, "i");
-    }
-    else if(strcmp(options, "lR") == 0){
-        optionL(directory, "l");
-    }
-    DIR *dir;
-    DIR *subDir;
-    int ret;
+void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
+        DIR * dir;
+    char temp[4096];
     struct dirent *entry;
-    char wholeDir[4096];
-    dir = opendir(directory);
-    printf("\n");
-    strcpy(currDir, directory);
-    while((entry = readdir(dir)) != NULL){
-        if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+    char timeBuff[50];
+    struct tm *newTime;
+    time_t curTimer;
+    struct group *grp;
+    struct passwd *pwd;
+    struct stat curStat;
+    pwd = getpwuid(geteuid());
+    biggestEntry(directory);
+    // char str[10][50], temp1[50];
+    int i =0;
+    
+
+    struct dirent **namelist;
+    int n;
+    n = scandir(directory, &namelist, 0, alphasort);
+            if (checkHidden(directory) == 1 || checkHidden(directory) == 2){
+                return;
+            }
+            strcat(temp, directory);
+            // strcat(temp, "/");
+            // strcat(temp, namelist->d_name);
+            stat(temp, &curStat);
+            curTimer = curStat.st_mtime;
+            newTime = localtime(&curTimer);
+            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+            grp = getgrgid(curStat.st_gid);
+
+
+            if (iCheck == 1 && lCheck == 1){
+                printf("%*ld ", maxNodeCount, curStat.st_ino);
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                strcpy(temp, "");
+            }
+            else if (iCheck == 1){
+                    printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, directory);
+                    strcpy(temp, "");
+            }
+            else if (lCheck == 1){
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                strcpy(temp, "");
+            }
+            else{
+                printf("%s\n", directory);
+            }
+}
+
+void normalPrint(char *directory){
+        struct dirent **namelist;
+        int n;
+        n = scandir(directory, &namelist, 0, alphasort);
+        for (int i = 0; i<n; i++){
+        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
                 continue;
             }
-        if (entry->d_type == DT_DIR){
-        strcpy(wholeDir, directory);
-        strcat(wholeDir, "/");
-        strcat(wholeDir, entry->d_name);
-         if ((subDir = opendir(wholeDir)) == NULL) {
-                    ret = errno;
-                    fprintf(stderr, "Cannot open '%s': %s\n", entry->d_name, strerror(ret));
-                    return 0;
+        printf("%s\n", namelist[i]->d_name);
+    }
+}
+
+void printDir(char*directory){
+        struct dirent **namelist;
+        int n;
+        n = scandir(directory, &namelist, 0, alphasort);
+        for (int i = 0; i<n; i++){
+        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                continue;
             }
-        // print entries in subdir
-        optionR(wholeDir, options);
+        printf("%s\n", namelist[i]->d_name);
+        normalPrint(namelist[i]->d_name);
+        // printDir(namelist[i]);
+    }
+    
+        
+}
+
+void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
+    struct stat curStat;
+    struct dirent **namelist;
+    struct stat stat_struct;
+    int n;
+    int length = 1024;
+    struct tm *newTime;
+    char temp[4096];
+    time_t curTimer;
+    char timeBuff[50];
+    struct group *grp;
+    struct passwd *pwd;
+    pwd = getpwuid(getuid());
+    biggestEntry(directory);
+    n = scandir(directory, &namelist, NULL, alphasort);
+
+    if (n < 0){
+        if(lstat(directory, &stat_struct) == -1){
+            printf("Error in print_dir on file");
         }
-        // if ((ret = optionR(wholeDir)) != 0) {
-        //     printf("UnixLs: cannot access '%s': %s",wholeDir,strerror(ret));
+        else{
+            printf("%lu\t%s\n ", stat_struct.st_size, directory);
+        }
+    }
+    else{
+        for (int i = 0; i < n; i++){
+                if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
+                free(namelist[i]);
+                continue;
+            }
+            if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                    continue;
+                }
+            char file[length*4];
+            strcpy(file, directory);
+                    // Don't add if it's '/'
+            if(strcmp("/", directory))
+                strcat(file, "/");
+            strcat(file, namelist[i]->d_name);
+            strcat(file, "\0");
+
+            // Check the file
+            if(lstat(file, &stat_struct)==-1){
+                printf("Error in print_dir on file: [%s]\n", file);
+                printf("%s\n", strerror(errno));
+                free(namelist[i]);
+                return 1;
+                }
+            
+
+
+
+            strcat(temp, directory);
+            strcat(temp, "/");
+            strcat(temp, namelist[i]->d_name);
+            stat(temp, &curStat);
+            curTimer = curStat.st_mtime;
+            newTime = localtime(&curTimer);
+            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+            grp = getgrgid(curStat.st_gid);
+
+
+            if (iCheck == 1 && lCheck == 1){
+                printf("%*ld ", maxNodeCount, curStat.st_ino);
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                strcpy(temp, "");
+            }
+            else if (iCheck == 1){
+                    printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
+                    strcpy(temp, "");
+            }
+            else if (lCheck == 1){
+                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                printPermissions(curStat.st_mode);
+                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                strcpy(temp, "");
+            }
+            else{
+                printf("%s\n", namelist[i]->d_name);
+            }
+        }
+    }
+}
+
+
+void optionR(char *directory, int iCheck, int rCheck, int lCheck){
+    
+    
+    printf("%s: \n", directory);
+    print_dir(directory, iCheck, rCheck, lCheck);
+    struct stat curStat;
+    struct dirent **namelist;
+    struct stat stat_struct;
+    int n;
+    int length = 1024;
+        struct tm *newTime;
+    char temp[4096];
+    time_t curTimer;
+    char timeBuff[50];
+    struct group *grp;
+    struct passwd *pwd;
+    pwd = getpwuid(getuid());
+    // biggestEntry(directory);
+    n = scandir(directory, &namelist, NULL, alphasort);
+    
+
+    if (n < 0){
+        if(lstat(directory, &stat_struct) == -1){
+            printf("Error in print_dir on file");
+        }
+        else{
+            printf("%lu\t%s\n ", stat_struct.st_size, directory);
+        }
+    }
+    // print_dir(directory, iCheck, rCheck, lCheck);
+    // printf("\n%s: ")
+    for (int i = 0; i < n; i++){
+         if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
+            free(namelist[i]);
+            continue;
+        }
+        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                continue;
+            }
+        char file[length*4];
+        strcpy(file, directory);
+                // Don't add if it's '/'
+        if(strcmp("/", directory))
+            strcat(file, "/");
+        strcat(file, namelist[i]->d_name);
+        strcat(file, "\0");
+
+        // Check the file
+        if(lstat(file, &stat_struct)==-1){
+            printf("Error in print_dir on file: [%s]\n", file);
+            printf("%s\n", strerror(errno));
+            free(namelist[i]);
+            return 1;
+        }
+        
+        // if it's a directory, time to dig a little deeper
+        if(S_ISDIR(stat_struct.st_mode)){
+            // printf("%s: \n", directory);
+            // print_dir(file, iCheck, rCheck, lCheck);
+            printf("\n");
+            optionR(file, iCheck, rCheck, lCheck);
+            
+
+
+        free(namelist[i]);
+        }
+        // else{
+            
+        //     strcat(temp, directory);
+        //     strcat(temp, "/");
+        //     strcat(temp, namelist[i]->d_name);
+        //     stat(temp, &curStat);
+        //     curTimer = curStat.st_mtime;
+        //     newTime = localtime(&curTimer);
+        //     strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+        //     grp = getgrgid(curStat.st_gid);
+
+
+        //     if (iCheck == 1 && lCheck == 1){
+        //         printf("%*ld ", maxNodeCount, curStat.st_ino);
+        //         printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+        //         printPermissions(curStat.st_mode);
+        //         printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+        //         strcpy(temp, "");
+        //     }
+        //     else if (iCheck == 1){
+        //             printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
+        //             strcpy(temp, "");
+        //     }
+        //     else if (lCheck == 1){
+        //         printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+        //         printPermissions(curStat.st_mode);
+        //         printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+        //         strcpy(temp, "");
+        //     }
+        //     else{
+        //         printf("%s\n", namelist[i]->d_name);
+        //     }
         // }
+    }
+    // if(strcmp(options, "R") == 0){
+    //     normalLs(directory);
+    // }
+    // else if(strcmp(options, "iR") == 0){
+    //     optionL(directory, iCheck, rCheck, lCheck);
+    // }
+    // else if(strcmp(options, "lR") == 0){
+    //     optionL(directory, "l");
+    // }
+    //     else if(strcmp(options, "ilR") == 0){
+    //     optionL(directory, "il");
+    // }
+    
+    // if (S_ISDIR(curStat.st_mode)) {
+    //     printDir(directory);
+    // }
+    // else{
+    //     normalPrint(directory);
+    // }
+    // optionL(directory, iCheck, rCheck, lCheck);
+    // DIR *dir;
+    // DIR *subDir;
+    // int ret;
+    // struct dirent *entry;
+    // char wholeDir[4096];
+    // dir = opendir(directory);
+    // printf("\n");
+    // strcpy(currDir, directory);
+    // while((entry = readdir(dir)) != NULL){
+    //     if (checkHidden(entry->d_name) == 1 || checkHidden(entry->d_name) == 2){
+    //             continue;
+    //         }
+    //     if (entry->d_type == DT_DIR){
+    //     strcpy(wholeDir, directory);
+    //     strcat(wholeDir, "/");
+    //     strcat(wholeDir, entry->d_name);
+    //      if ((subDir = opendir(wholeDir)) == NULL) {
+    //                 ret = errno;
+    //                 fprintf(stderr, "Cannot open '%s': %s\n", entry->d_name, strerror(ret));
+    //                 return 0;
+    //         }
+    //     // strcpy(rDir[k], wholeDir);
+    //     // k++;
+    //     // print entries in subdir
+    //     optionR(wholeDir, iCheck, rCheck, lCheck);
+    //     }
+    //     // if ((ret = optionR(wholeDir)) != 0) {
+    //     //     printf("UnixLs: cannot access '%s': %s",wholeDir,strerror(ret));
+    //     // }
         
 
-    }
-    closedir(subDir);
+    // }
+    // closedir(subDir);
+    
 }
+
+// void sortR(char toSort[]){
+//     char temp[50];
+//        // storing strings in the lexicographical order
+//    for (int i = 0; i < 10; ++i) {
+//       for (int j = i + 1; j < 5; ++j) {
+
+//          // swapping strings if they are not in the lexicographical order
+//          if (strcmp(toSort[i], toSort[j]) > 0) {
+//             strcpy(temp, toSort[i]);
+//             strcpy(toSort[i], toSort[j]);
+//             strcpy(toSort[j], temp);
+//          }
+//       }
+//    }
+
+//    printf("\nIn the lexicographical order: \n");
+//    for (int i = 0; i < 10; ++i) {
+//       fputs(toSort[i], stdout);
+//    }
+// }
 
