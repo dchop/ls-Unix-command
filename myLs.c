@@ -124,6 +124,9 @@ void biggestEntry(char *directory){
     struct stat allStat;
     char wholeDir[4096];
 
+    width1 = 0;
+    width2 = 0;
+    maxNodeCount = 0;
 
     dir = opendir(directory);
 
@@ -214,6 +217,35 @@ void printPermissions(__mode_t newMode){
     else {printf("-");}
 }
 
+void *fileType(__mode_t newMode){
+    switch(newMode & S_IFMT){
+        case S_IFCHR:
+            printf("c");
+            return 'c';
+        case S_IFBLK:
+            printf("b");
+            return 'b';
+        case S_IFIFO:
+            printf("p");
+            return 'p';
+        case S_IFDIR:
+            printf("d");
+            return 'd';
+        case S_IFLNK:
+            printf("l");
+            return 'l';
+        case S_IFSOCK:
+            printf("s");
+            return 's';
+        case S_IFREG:
+            printf("-");
+            return '-';
+        default:
+            printf("?");
+            return '?';
+    }
+}
+
 void optionL(char *directory, int iCheck, int rCheck, int lCheck){
     DIR * dir;
     char temp[4096];
@@ -226,6 +258,8 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
     struct stat curStat;
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
+    char link[64] = {0};
+    char symbolic_link[1024] = {'\0'};
     // char str[10][50], temp1[50];
     int i =0;
 
@@ -278,39 +312,135 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
         }
         
             for (int j = 0; j<n; j++){
-            if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
-                continue;
-            }
-            strcat(temp, directory);
-            strcat(temp, "/");
-            strcat(temp, namelist[j]->d_name);
-            stat(temp, &curStat);
-            curTimer = curStat.st_mtime;
-            newTime = localtime(&curTimer);
-            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
-            grp = getgrgid(curStat.st_gid);
+                if (checkHidden(namelist[j]->d_name) == 1 || checkHidden(namelist[j]->d_name) == 2){
+                    continue;
+                }
+                char file[4096];
+                strcpy(file, directory);
+                if(strcmp("/", directory))
+                    strcat(file, "/");
+                strcat(file, namelist[j]->d_name);
+                strcat(file, "\0");
+
+        // error
+                if(lstat(file, &curStat)==-1){
+                    printf("Error in print_dir on file: [%s]\n", file);
+                    printf("%s\n", strerror(errno));
+                    return 1;
+                }
+
+                curTimer = curStat.st_mtime;
+                newTime = localtime(&curTimer);
+                strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                grp = getgrgid(curStat.st_gid);
 
 
-            if (iCheck == 1 && lCheck == 1){
-                printf("%*ld ", maxNodeCount, curStat.st_ino);
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
-                strcpy(temp, "");
-            }
-            else if (iCheck == 1){
-                    printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
-                    strcpy(temp, "");
-            }
-            else if (lCheck == 1){
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
-                strcpy(temp, "");
-            }
-            else{
-                printf("%s\n", namelist[j]->d_name);
-            }
+                if (iCheck == 1 && lCheck == 1){
+                    // char *ret;
+                    // ret = strstr(namelist[j]->d_name, " ");
+                    // if (ret){
+                    //     printf("%*ld ", maxNodeCount, curStat.st_ino);
+                    //     printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                    //     printPermissions(curStat.st_mode);
+                    //     printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                    //     strcpy(temp, "");
+                    // }
+                    // else{
+                    //     printf("%*ld ", maxNodeCount, curStat.st_ino);
+                    //     printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                    //     printPermissions(curStat.st_mode);
+                    //     printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                    //     strcpy(temp, "");
+                    // }
+                    char *ret;
+                    ret = strstr(namelist[i]->d_name, " ");
+                    printf("%*ld ", maxNodeCount, curStat.st_ino);
+                    char k = fileType(curStat.st_mode);
+                    if (ret){
+                        if( k == 'l'){
+                            readlink(file, symbolic_link, 1024);
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name, symbolic_link);
+                            strcpy(temp, "");
+                        }
+                        else{
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                            strcpy(temp, "");
+                        }
+                    }
+                    else{
+                        if( k == 'l'){
+                            readlink(file, symbolic_link, 1024);
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name, symbolic_link);
+                            strcpy(temp, "");
+                        }
+                        else{
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                            strcpy(temp, "");
+                        }
+                    }
+                }
+                else if (iCheck == 1){
+                    char *ret;
+                    ret = strstr(namelist[j]->d_name, " ");
+                    if (ret){
+                        printf("%*ld \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
+                        strcpy(temp, "");
+                    }
+                    else{
+                        printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
+                        strcpy(temp, "");
+                    }
+                }
+                else if (lCheck == 1){
+                    char *ret;
+                    ret = strstr(namelist[j]->d_name, " ");
+                    char k = fileType(curStat.st_mode);
+                    if (ret){
+                        if (k == 'l'){ 
+                            readlink(file, symbolic_link, 1024);                                          
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name, symbolic_link);
+                            strcpy(temp, ""); 
+                        }
+                        else{
+                        // printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                        strcpy(temp, "");
+                        }
+                    }
+                    else{
+                        if (k == 'l'){
+                            readlink(file, symbolic_link, 1024);
+                            printPermissions(curStat.st_mode);
+                            printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name, symbolic_link);
+                            strcpy(temp, "");
+                        }
+                        else{
+                        // printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                        // printf( (S_ISLNK(curStat.st_mode)) ? readlink(directory, symbolic_link, 64) : "-");
+                        // printf("THis link is: %s\n", symbolic_link);
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[j]->d_name);
+                        strcpy(temp, "");
+                        }
+                    }
+                }
+                else{
+                    char *ret;
+                    ret = strstr(namelist[j]->d_name, " ");
+                    if (ret){
+                        // printf("This has a space \n");
+                        printf("\'%s\'\n", namelist[j]->d_name);
+                    }
+                    else{
+                    printf("%s\n", namelist[j]->d_name);
+                    }
+                }
 
         }
         if ( n!=-1){
@@ -325,7 +455,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
 } 
 
 void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
-        DIR * dir;
+    DIR * dir;
     char temp[4096];
     struct dirent *entry;
     char timeBuff[50];
@@ -336,6 +466,7 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
     struct stat curStat;
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
+    char symbolic_link[1024] = {'\0'};
     // char str[10][50], temp1[50];
     int i =0;
     
@@ -346,64 +477,113 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
             if (checkHidden(directory) == 1 || checkHidden(directory) == 2){
                 return;
             }
-            strcat(temp, directory);
-            // strcat(temp, "/");
-            // strcat(temp, namelist->d_name);
-            stat(temp, &curStat);
-            curTimer = curStat.st_mtime;
-            newTime = localtime(&curTimer);
-            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
-            grp = getgrgid(curStat.st_gid);
+            // strcat(temp, directory);
+            // // strcat(temp, "/");
+            // // strcat(temp, namelist->d_name);
+            // stat(temp, &curStat);
+            // curTimer = curStat.st_mtime;
+            // newTime = localtime(&curTimer);
+            // strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+            // grp = getgrgid(curStat.st_gid);
+
+                char file[4096];
+                strcpy(file, directory);
+                // if(strcmp("/", directory))
+                //     strcat(file, "/");
+                // strcat(file, namelist[i]->d_name);
+                strcat(file, "\0");
+
+        // error
+                if(lstat(file, &curStat)==-1){
+                    printf("Error in print_dir on file: [%s]\n", file);
+                    printf("%s\n", strerror(errno));
+                    return 1;
+                }
+
+                curTimer = curStat.st_mtime;
+                newTime = localtime(&curTimer);
+                strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                grp = getgrgid(curStat.st_gid);
 
 
             if (iCheck == 1 && lCheck == 1){
+                char *ret;
+                ret = strstr(directory, " ");
                 printf("%*ld ", maxNodeCount, curStat.st_ino);
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
-                strcpy(temp, "");
+                char k = fileType(curStat.st_mode);
+                if(ret){
+                    if(k == 'l'){
+                    readlink(file, symbolic_link, 1024);
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory, symbolic_link);
+                    strcpy(temp, "");
+                    }
+                    else {
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                    strcpy(temp, "");
+                    }
+                }
+                else{
+                    if(k == 'l'){
+                    readlink(file, symbolic_link, 1024);
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory, symbolic_link);
+                    strcpy(temp, "");
+                    }
+                    else {
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                    strcpy(temp, "");
+                    } 
+                }
             }
             else if (iCheck == 1){
                     printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, directory);
                     strcpy(temp, "");
             }
             else if (lCheck == 1){
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
-                strcpy(temp, "");
+                char *ret;
+                ret = strstr(directory, " ");
+                char k = fileType(curStat.st_mode);
+                if(ret){
+                    if(k == 'l'){
+                    readlink(file, symbolic_link, 1024);
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory, symbolic_link);
+                    strcpy(temp, "");
+                    }
+                    else {
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                    strcpy(temp, "");
+                    }
+                }
+                else{
+                    if(k == 'l'){
+                    readlink(file, symbolic_link, 1024);
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory, symbolic_link);
+                    strcpy(temp, "");
+                    }
+                    else {
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, directory);
+                    strcpy(temp, "");
+                    } 
+                }
             }
             else{
+                char *ret;
+                ret = strstr(directory, " ");
+                if (ret){
+                    // printf("This has a space \n");
+                    printf("\'%s\'\n", directory);
+                }
+                else{
                 printf("%s\n", directory);
+                }
             }
-}
-
-void normalPrint(char *directory){
-        struct dirent **namelist;
-        int n;
-        n = scandir(directory, &namelist, 0, alphasort);
-        for (int i = 0; i<n; i++){
-        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
-                continue;
-            }
-        printf("%s\n", namelist[i]->d_name);
-    }
-}
-
-void printDir(char*directory){
-        struct dirent **namelist;
-        int n;
-        n = scandir(directory, &namelist, 0, alphasort);
-        for (int i = 0; i<n; i++){
-        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
-                continue;
-            }
-        printf("%s\n", namelist[i]->d_name);
-        normalPrint(namelist[i]->d_name);
-        // printDir(namelist[i]);
-    }
-    
-        
 }
 
 void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
@@ -418,6 +598,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
     char timeBuff[50];
     struct group *grp;
     struct passwd *pwd;
+    char symbolic_link[1024] = {'\0'};
     pwd = getpwuid(getuid());
     biggestEntry(directory);
     n = scandir(directory, &namelist, NULL, alphasort);
@@ -432,61 +613,122 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
     }
     else{
         for (int i = 0; i < n; i++){
-                if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
+            if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
                 free(namelist[i]);
                 continue;
             }
             if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
                     continue;
                 }
-            char file[length*4];
-            strcpy(file, directory);
-                    // Don't add if it's '/'
-            if(strcmp("/", directory))
-                strcat(file, "/");
-            strcat(file, namelist[i]->d_name);
-            strcat(file, "\0");
+                char file[4096];
+                strcpy(file, directory);
+                if(strcmp("/", directory))
+                    strcat(file, "/");
+                strcat(file, namelist[i]->d_name);
+                strcat(file, "\0");
 
-            // Check the file
-            if(lstat(file, &stat_struct)==-1){
-                printf("Error in print_dir on file: [%s]\n", file);
-                printf("%s\n", strerror(errno));
-                free(namelist[i]);
-                return 1;
+        // error
+                if(lstat(file, &curStat)==-1){
+                    printf("Error in print_dir on file: [%s]\n", file);
+                    printf("%s\n", strerror(errno));
+                    return 1;
                 }
-            
 
-
-
-            strcat(temp, directory);
-            strcat(temp, "/");
-            strcat(temp, namelist[i]->d_name);
-            stat(temp, &curStat);
-            curTimer = curStat.st_mtime;
-            newTime = localtime(&curTimer);
-            strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
-            grp = getgrgid(curStat.st_gid);
+                curTimer = curStat.st_mtime;
+                newTime = localtime(&curTimer);
+                strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                grp = getgrgid(curStat.st_gid);
 
 
             if (iCheck == 1 && lCheck == 1){
+                char *ret;
+                ret = strstr(namelist[i]->d_name, " ");
                 printf("%*ld ", maxNodeCount, curStat.st_ino);
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
-                strcpy(temp, "");
+                char k = fileType(curStat.st_mode);
+                if (ret){
+                    if( k == 'l'){
+                        readlink(file, symbolic_link, 1024);
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name, symbolic_link);
+                        strcpy(temp, "");
+                    }
+                    else{
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                        strcpy(temp, "");
+                    }
+                }
+                else{
+                    if( k == 'l'){
+                        readlink(file, symbolic_link, 1024);
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name, symbolic_link);
+                        strcpy(temp, "");
+                    }
+                    else{
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                        strcpy(temp, "");
+                    }
+                }
             }
             else if (iCheck == 1){
+                char *ret;
+                ret = strstr(namelist[i]->d_name, " ");
+                if (ret){
+                    printf("%*ld \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
+                    strcpy(temp, "");
+                }
+                else{
                     printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
                     strcpy(temp, "");
+                }
             }
             else if (lCheck == 1){
-                printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
-                printPermissions(curStat.st_mode);
-                printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
-                strcpy(temp, "");
+                char *ret;
+                ret = strstr(namelist[i]->d_name, " ");
+                char k = fileType(curStat.st_mode);
+                if (ret){
+                    if (k == 'l'){ 
+                        readlink(file, symbolic_link, 1024);                                          
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s \'%s\' -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name, symbolic_link);
+                        strcpy(temp, ""); 
+                    }
+                    else{
+                    // printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s \'%s\'\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                    strcpy(temp, "");
+                    }
+                }
+                else{
+                    if (k == 'l'){
+                        readlink(file, symbolic_link, 1024);
+                        printPermissions(curStat.st_mode);
+                        printf(" %*ld %s %s %*ld %s %s -> %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name, symbolic_link);
+                        strcpy(temp, "");
+                    }
+                    else{
+                    // printf( (S_ISDIR(curStat.st_mode)) ? "d" : "-");
+                    // printf( (S_ISLNK(curStat.st_mode)) ? readlink(directory, symbolic_link, 64) : "-");
+                    // printf("THis link is: %s\n", symbolic_link);
+                    printPermissions(curStat.st_mode);
+                    printf(" %*ld %s %s %*ld %s %s\n", width1, curStat.st_nlink, pwd->pw_name, grp->gr_name, width2, curStat.st_size, timeBuff, namelist[i]->d_name);
+                    strcpy(temp, "");
+                    }
+                }
             }
             else{
+                char *ret;
+                ret = strstr(namelist[i]->d_name, " ");
+                if (ret){
+                    // printf("This has a space \n");
+                    printf("\'%s\'\n", namelist[i]->d_name);
+                }
+                else{
                 printf("%s\n", namelist[i]->d_name);
+                }
             }
         }
     }
@@ -495,8 +737,12 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
 
 void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     
-    
-    printf("%s: \n", directory);
+    if (strstr(directory, " ")){
+        printf("\'%s\': \n", directory);
+    }
+    else{
+        printf("%s: \n", directory);
+    }
     print_dir(directory, iCheck, rCheck, lCheck);
     struct stat curStat;
     struct dirent **namelist;
@@ -525,7 +771,7 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     // print_dir(directory, iCheck, rCheck, lCheck);
     // printf("\n%s: ")
     for (int i = 0; i < n; i++){
-         if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
+        if(!(strcmp(".", namelist[i]->d_name) && strcmp("..",namelist[i]->d_name))){ 
             free(namelist[i]);
             continue;
         }
@@ -535,8 +781,9 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
         char file[length*4];
         strcpy(file, directory);
                 // Don't add if it's '/'
-        if(strcmp("/", directory))
+        if(strcmp("/", directory)){
             strcat(file, "/");
+        }
         strcat(file, namelist[i]->d_name);
         strcat(file, "\0");
 
@@ -554,13 +801,12 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
             // print_dir(file, iCheck, rCheck, lCheck);
             printf("\n");
             optionR(file, iCheck, rCheck, lCheck);
-            
-
-
-        free(namelist[i]);
         }
+        free(namelist[i]);
         // else{
-            
+    }
+    free(namelist);
+}   
         //     strcat(temp, directory);
         //     strcat(temp, "/");
         //     strcat(temp, namelist[i]->d_name);
@@ -592,7 +838,7 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
         //         printf("%s\n", namelist[i]->d_name);
         //     }
         // }
-    }
+
     // if(strcmp(options, "R") == 0){
     //     normalLs(directory);
     // }
@@ -647,8 +893,6 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     // }
     // closedir(subDir);
     
-}
-
 // void sortR(char toSort[]){
 //     char temp[50];
 //        // storing strings in the lexicographical order
