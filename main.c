@@ -36,8 +36,28 @@ int main(int argc, char* args[])
     //     normalLs(".");
 
     // }
+    char *temp1;
+    char* tempArr[argc];
+    for (int i = 0; i < argc; i++){
+        if(args[i][0] == '-' && args[i][1] != 'l' && args[i][1] != 'R' && args[i][1] != 'i'){
+            temp1 = malloc(strlen(args[i]) + 3);
+            strcpy(temp1, args[i]);
+            size_t len = strlen("./");
+            memmove(temp1 + len, temp1, strlen(temp1) +1);
+            memcpy(temp1, "./", len);
+            // temp1 = args[i];
+            // temp1[0] = '.';
+            // temp1[1] = '/';
+            // printf("-xyz: %s", temp1);
+            tempArr[i] = temp1;
+        }
+        else{
+            tempArr[i] = args[i];
+        }
+    }
 
-    while ((optionChecker = getopt(argc, args, "iRl")) != -1)
+
+    while ((optionChecker = getopt(argc, tempArr, "iRl")) != -1)
         switch (optionChecker) {
             case 'i':
                 iCheck = 1;

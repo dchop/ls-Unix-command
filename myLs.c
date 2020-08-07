@@ -332,6 +332,9 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
                 curTimer = curStat.st_mtime;
                 newTime = localtime(&curTimer);
                 strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                if (timeBuff[4] == '0'){
+                    timeBuff[4] = ' ';
+                }
                 grp = getgrgid(curStat.st_gid);
 
 
@@ -503,6 +506,9 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
                 curTimer = curStat.st_mtime;
                 newTime = localtime(&curTimer);
                 strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                if (timeBuff[4] == '0'){
+                    timeBuff[4] = ' ';
+                }
                 grp = getgrgid(curStat.st_gid);
 
 
@@ -637,6 +643,9 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
                 curTimer = curStat.st_mtime;
                 newTime = localtime(&curTimer);
                 strftime(timeBuff, 50, "%b %2d %4Y %2H:%2M", newTime);
+                if (timeBuff[4] == '0'){
+                    timeBuff[4] = ' ';
+                }
                 grp = getgrgid(curStat.st_gid);
 
 
