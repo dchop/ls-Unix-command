@@ -15,20 +15,11 @@
 
 #include "myLs.h"
 
-int alphasort_case_insensitive(const struct dirent ** a, const struct dirent **b) 
-{
-    return(strcasecmp((*(const struct dirent **)a)->d_name,
-                (*(const struct dirent **)b)->d_name));
-}
 int alphasort(const struct dirent **d1, const struct dirent **d2);
 
 static int width1 = 0;
 static int width2 = 0;
 static int maxNodeCount = 0;
-
-static char currDir[4096];
-static char rDir[10][50];
-static int k = 0;
 
 int checkHidden(char *name){
     if(!strcmp(name, ".") || !strcmp(name, ".")){
@@ -40,26 +31,6 @@ int checkHidden(char *name){
     else{
         return 0;
     }
-}
-
-void normalLs(char *directory){
-
-	DIR * dir;
-	struct dirent * entry;
-
-	dir = opendir(directory);
-
-    struct dirent **namelist;
-    int i,n;
-    char *path;
-
-    n = scandir(directory, &namelist, 0, alphasort);
-    for (int i = 0; i<n; i++){
-        if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
-                continue;
-            }
-        printf("%s\n", namelist[i]->d_name);
-    }	
 }
 
 void biggestEntry(char *directory){
@@ -94,20 +65,20 @@ void biggestEntry(char *directory){
             stat(wholeDir, &allStat);
             sprintf(newSize, "%ld", allStat.st_size);
             sprintf(maxNode, "%ld", allStat.st_ino);
-            for (int i = 0; i < strlen(maxNode); i++){
+            for (size_t i = 0; i < strlen(maxNode); i++){
                 currNodeCount++;
                 if(maxNodeCount < currNodeCount){
                     maxNodeCount = currNodeCount;
                 }
             }
-            for(int i = 0; i< strlen(newSize); i++){
+            for(size_t i = 0; i< strlen(newSize); i++){
                 counter++;
                 if (maxCount < counter){
                     maxCount = counter;
                 }
             }
             sprintf(newStringSize, "%ld", allStat.st_nlink);
-            for(int j = 0; j < strlen(newStringSize); j++){
+            for(size_t j = 0; j < strlen(newStringSize); j++){
                 stringCount++;
                 if(maxScount < stringCount){
                     maxScount = stringCount;
@@ -193,9 +164,8 @@ void *fileType(__mode_t newMode){
 }
 
 void optionL(char *directory, int iCheck, int rCheck, int lCheck){
-    DIR * dir;
+
     char temp[4096];
-    struct dirent *entry;
     char timeBuff[50];
     struct tm *newTime;
     time_t curTimer;
@@ -204,9 +174,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
     struct stat curStat;
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
-    char link[64] = {0};
     char symbolic_link[1024] = {'\0'};
-    int i =0;
     struct dirent **namelist;
     int n;
     n = scandir(directory, &namelist, 0, alphasort);
@@ -333,9 +301,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
 } 
 
 void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
-    DIR * dir;
     char temp[4096];
-    struct dirent *entry;
     char timeBuff[50];
     struct tm *newTime;
     time_t curTimer;
@@ -345,10 +311,6 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
     pwd = getpwuid(geteuid());
     biggestEntry(directory);
     char symbolic_link[1024] = {'\0'};
-    int i =0;
-    struct dirent **namelist;
-    int n;
-    n = scandir(directory, &namelist, 0, alphasort);
 
             if (checkHidden(directory) == 1 || checkHidden(directory) == 2){
                 return;
@@ -455,7 +417,6 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
     struct dirent **namelist;
     struct stat stat_struct;
     int n;
-    int length = 1024;
     struct tm *newTime;
     char temp[4096];
     time_t curTimer;
@@ -596,18 +557,10 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
         printf("%s: \n", directory);
     }
     print_dir(directory, iCheck, rCheck, lCheck);
-    struct stat curStat;
     struct dirent **namelist;
     struct stat stat_struct;
     int n;
     int length = 1024;
-        struct tm *newTime;
-    char temp[4096];
-    time_t curTimer;
-    char timeBuff[50];
-    struct group *grp;
-    struct passwd *pwd;
-    pwd = getpwuid(getuid());
     n = scandir(directory, &namelist, NULL, alphasort);
     
 
