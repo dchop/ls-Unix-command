@@ -134,7 +134,7 @@ void printPermissions(__mode_t newMode){
     else {printf("-");}
 }
 
-void *fileType(__mode_t newMode){
+char fileType(__mode_t newMode){
     switch(newMode & S_IFMT){
         case S_IFCHR:
             printf("c");
@@ -163,7 +163,7 @@ void *fileType(__mode_t newMode){
     }
 }
 
-void optionL(char *directory, int iCheck, int rCheck, int lCheck){
+void optionL(char *directory, int iCheck, int lCheck){
 
     char temp[4096];
     char timeBuff[50];
@@ -296,11 +296,11 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
         }
         
         if (n == -1){
-            printSingleFile(directory, iCheck, rCheck, lCheck);
+            printSingleFile(directory, iCheck, lCheck);
         }
 } 
 
-void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
+void printSingleFile(char *directory, int iCheck, int lCheck){
     char temp[4096];
     char timeBuff[50];
     struct tm *newTime;
@@ -412,7 +412,7 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
             }
 }
 
-void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
+void print_dir(char *directory, int iCheck, int lCheck){
     struct stat curStat;
     struct dirent **namelist;
     struct stat stat_struct;
@@ -447,8 +447,9 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
                 }
                 char file[4096];
                 strcpy(file, directory);
-                if(strcmp("/", directory))
+                if(strcmp("/", directory)){
                     strcat(file, "/");
+                }
                 strcat(file, namelist[i]->d_name);
                 strcat(file, "\0");
 
@@ -556,7 +557,7 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     else{
         printf("%s: \n", directory);
     }
-    print_dir(directory, iCheck, rCheck, lCheck);
+    print_dir(directory, iCheck, lCheck);
     struct dirent **namelist;
     struct stat stat_struct;
     int n;

@@ -5,10 +5,10 @@
 int checkHidden(char *name);
 void biggestEntry(char *directory);
 void printPermissions(__mode_t newMode);
-void *fileType(__mode_t newMode);
-void optionL(char *directory, int iCheck, int rCheck, int lCheck);
-void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck);
-void print_dir(char *directory, int iCheck, int rCheck, int lCheck);
+char fileType(__mode_t newMode);
+void optionL(char *directory, int iCheck, int lCheck);
+void printSingleFile(char *directory, int iCheck, int lCheck);
+void print_dir(char *directory, int iCheck, int lCheck);
 void optionR(char *directory, int iCheck, int rCheck, int lCheck);
 
 #endif
