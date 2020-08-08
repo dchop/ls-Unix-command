@@ -43,7 +43,7 @@ void biggestEntry(char *directory){
     char newStringSize[50];
     struct dirent * entry;
     struct stat allStat;
-    char wholeDir[4096];
+    char wholeDir[4096] = {'\0'};
 
     width1 = 0;
     width2 = 0;
@@ -176,7 +176,7 @@ void optionL(char *directory, int iCheck, int lCheck){
     biggestEntry(directory);
     char symbolic_link[1024] = {'\0'};
     struct dirent **namelist;
-    int n;
+    int n = 0;
     n = scandir(directory, &namelist, 0, alphasort);
 
         if(n != -1){
@@ -298,6 +298,7 @@ void optionL(char *directory, int iCheck, int lCheck){
         if (n == -1){
             printSingleFile(directory, iCheck, lCheck);
         }
+        free(namelist);
 } 
 
 void printSingleFile(char *directory, int iCheck, int lCheck){

@@ -17,11 +17,43 @@ int main(int argc, char* args[])
     int lCheck = 0;
     char directoryPath[4096];
     int optionChecker;
+    struct stat dirStat;
 
     getcwd(directoryPath, sizeof(directoryPath));
 
     char *temp1;
     char* tempArr[argc];
+    char* toPrintDirsFirst[argc];
+    int j = 0;
+
+    // for (int i = 0; i < argc; i++){
+    //     char temFile[4096];
+    //     strcpy(temFile, args[i]);
+    //     strcat(temFile, "\0");
+    //     lstat(temFile, &dirStat);
+
+    //     if (dirStat.st_mode & S_IFDIR){
+    //         continue;
+    //     }
+    //     else{
+    //         toPrintDirsFirst[i] = args[i];
+    //     }
+    //     j++;
+    // }
+    // for (int i = 0; i < argc; i++){
+    //     char temFile1[4096];
+    //     strcpy(temFile1, args[i]);
+    //     strcat(temFile1, "\0");
+    //     lstat(temFile1, &dirStat);
+    //     if (dirStat.st_mode & S_IFDIR){
+    //         toPrintDirsFirst[j] = args[i];
+    //         j++;
+    //     }
+    //     else{
+    //         continue;
+    //     }
+    // }
+
 
     for (int i = 0; i < argc; i++){
         if(args[i][0] == '-' && args[i][1] != 'l' && args[i][1] != 'R' && args[i][1] != 'i'){
@@ -36,6 +68,7 @@ int main(int argc, char* args[])
             tempArr[i] = args[i];
         }
     }
+    // free(temp1);
 
     while ((optionChecker = getopt(argc, tempArr, "iRl")) != -1)
         switch (optionChecker) {
