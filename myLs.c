@@ -308,7 +308,12 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
 
     // else if (strcmp(options, "il") == 0){
         if(n != -1){
+            if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
+                printf("\'%s\': \n", directory);
+            }
+            else{
             printf("%s: \n", directory);
+            }
         }
         
             for (int j = 0; j<n; j++){
@@ -356,10 +361,10 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
                     //     strcpy(temp, "");
                     // }
                     char *ret;
-                    ret = strstr(namelist[i]->d_name, " ");
+                    ret = strstr(namelist[j]->d_name, " ");
                     printf("%*ld ", maxNodeCount, curStat.st_ino);
                     char k = fileType(curStat.st_mode);
-                    if (ret){
+                    if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
                         if( k == 'l'){
                             readlink(file, symbolic_link, 1024);
                             printPermissions(curStat.st_mode);
@@ -389,7 +394,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
                 else if (iCheck == 1){
                     char *ret;
                     ret = strstr(namelist[j]->d_name, " ");
-                    if (ret){
+                    if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
                         printf("%*ld \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
                         strcpy(temp, "");
                     }
@@ -402,7 +407,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
                     char *ret;
                     ret = strstr(namelist[j]->d_name, " ");
                     char k = fileType(curStat.st_mode);
-                    if (ret){
+                    if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
                         if (k == 'l'){ 
                             readlink(file, symbolic_link, 1024);                                          
                             printPermissions(curStat.st_mode);
@@ -436,7 +441,7 @@ void optionL(char *directory, int iCheck, int rCheck, int lCheck){
                 else{
                     char *ret;
                     ret = strstr(namelist[j]->d_name, " ");
-                    if (ret){
+                    if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
                         // printf("This has a space \n");
                         printf("\'%s\'\n", namelist[j]->d_name);
                     }
@@ -517,7 +522,7 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
                 ret = strstr(directory, " ");
                 printf("%*ld ", maxNodeCount, curStat.st_ino);
                 char k = fileType(curStat.st_mode);
-                if(ret){
+                if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
                     if(k == 'l'){
                     readlink(file, symbolic_link, 1024);
                     printPermissions(curStat.st_mode);
@@ -545,14 +550,20 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
                 }
             }
             else if (iCheck == 1){
+                if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
+                    printf("%*ld \'%s\'  \n", maxNodeCount, curStat.st_ino, directory);
+                    strcpy(temp, "");
+                }
+                else{
                     printf("%*ld %s  \n", maxNodeCount, curStat.st_ino, directory);
                     strcpy(temp, "");
+                }   
             }
             else if (lCheck == 1){
                 char *ret;
                 ret = strstr(directory, " ");
                 char k = fileType(curStat.st_mode);
-                if(ret){
+                if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
                     if(k == 'l'){
                     readlink(file, symbolic_link, 1024);
                     printPermissions(curStat.st_mode);
@@ -582,7 +593,7 @@ void printSingleFile(char *directory, int iCheck, int rCheck, int lCheck){
             else{
                 char *ret;
                 ret = strstr(directory, " ");
-                if (ret){
+                if (strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
                     // printf("This has a space \n");
                     printf("\'%s\'\n", directory);
                 }
@@ -654,7 +665,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
                 ret = strstr(namelist[i]->d_name, " ");
                 printf("%*ld ", maxNodeCount, curStat.st_ino);
                 char k = fileType(curStat.st_mode);
-                if (ret){
+                if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
                     if( k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -684,7 +695,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
             else if (iCheck == 1){
                 char *ret;
                 ret = strstr(namelist[i]->d_name, " ");
-                if (ret){
+                if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
                     printf("%*ld \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
                     strcpy(temp, "");
                 }
@@ -697,7 +708,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
                 char *ret;
                 ret = strstr(namelist[i]->d_name, " ");
                 char k = fileType(curStat.st_mode);
-                if (ret){
+                if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
                     if (k == 'l'){ 
                         readlink(file, symbolic_link, 1024);                                          
                         printPermissions(curStat.st_mode);
@@ -731,7 +742,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
             else{
                 char *ret;
                 ret = strstr(namelist[i]->d_name, " ");
-                if (ret){
+                if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
                     // printf("This has a space \n");
                     printf("\'%s\'\n", namelist[i]->d_name);
                 }
@@ -746,7 +757,7 @@ void print_dir(char *directory, int iCheck, int rCheck, int lCheck){
 
 void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     
-    if (strstr(directory, " ")){
+    if (strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
         printf("\'%s\': \n", directory);
     }
     else{

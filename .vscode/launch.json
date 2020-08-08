@@ -39,7 +39,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/myls",
-            "args": ["-l"],
+            "args": ["*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
