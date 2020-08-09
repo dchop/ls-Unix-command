@@ -10,6 +10,6 @@ valgrind: output
 			 --show-leak-kinds=all \
 			 --track-origins=yes \
 			 --show-reachable=yes \
-			 ./myls
+			 ./myls -ilR Test/
 clean:
 	rm -f *.o* myls

@@ -39,8 +39,8 @@ void biggestEntry(char *directory){
     int maxCount = 0;
     int maxScount = 0;
     char newSize[50];
-    char maxNode[50];
-    char newStringSize[50];
+    char maxNode[50] = {'\0'};
+    char newStringSize[50] = {'\0'};
     struct dirent * entry;
     struct stat allStat;
     char wholeDir[4096] = {'\0'};
@@ -48,6 +48,7 @@ void biggestEntry(char *directory){
     width1 = 0;
     width2 = 0;
     maxNodeCount = 0;
+    int test = 0;
 
     dir = opendir(directory);
 
@@ -59,11 +60,12 @@ void biggestEntry(char *directory){
             int counter = 0;
             int currNodeCount = 0;
             int stringCount = 0;
+            memset(newSize, 0, sizeof newSize);
             strcat(wholeDir, directory);
             strcat(wholeDir, "/");
             strcat(wholeDir, entry->d_name);
-            stat(wholeDir, &allStat);
-            sprintf(newSize, "%ld", allStat.st_size);
+            lstat(wholeDir, &allStat);
+            test = sprintf(newSize, "%ld", allStat.st_size);
             sprintf(maxNode, "%ld", allStat.st_ino);
             for (size_t i = 0; i < strlen(maxNode); i++){
                 currNodeCount++;
@@ -165,8 +167,8 @@ char fileType(__mode_t newMode){
 
 void optionL(char *directory, int iCheck, int lCheck){
 
-    char temp[4096];
-    char timeBuff[50];
+    char temp[4096] = {'\0'};
+    char timeBuff[50] = {'\0'};
     struct tm *newTime;
     time_t curTimer;
     struct group *grp;
@@ -293,12 +295,13 @@ void optionL(char *directory, int iCheck, int lCheck){
         }
         if ( n!=-1){
                 printf("\n");
+                free(namelist);
         }
         
         if (n == -1){
             printSingleFile(directory, iCheck, lCheck);
         }
-        free(namelist);
+        
 } 
 
 void printSingleFile(char *directory, int iCheck, int lCheck){
@@ -417,7 +420,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
     struct stat curStat;
     struct dirent **namelist;
     struct stat stat_struct;
-    int n;
+    int n = 0;
     struct tm *newTime;
     char temp[4096];
     time_t curTimer;
@@ -444,6 +447,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
                 continue;
             }
             if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                    free(namelist[i]);
                     continue;
                 }
                 char file[4096];
@@ -545,8 +549,14 @@ void print_dir(char *directory, int iCheck, int lCheck){
                 printf("%s\n", namelist[i]->d_name);
                 }
             }
+            free(namelist[i]);
         }
+     
     }
+    if(n != -1){
+        free(namelist);
+    }
+   
 }
 
 
@@ -561,11 +571,10 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     print_dir(directory, iCheck, lCheck);
     struct dirent **namelist;
     struct stat stat_struct;
-    int n;
+    int n =0;
     int length = 1024;
     n = scandir(directory, &namelist, NULL, alphasort);
     
-
     if (n < 0){
         if(lstat(directory, &stat_struct) == -1){
             printf("Error in print_dir on file");
@@ -580,6 +589,7 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
             continue;
         }
         if (checkHidden(namelist[i]->d_name) == 1 || checkHidden(namelist[i]->d_name) == 2){
+                free(namelist[i]);
                 continue;
             }
         char file[length*4];
@@ -604,5 +614,7 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
         }
         free(namelist[i]);
     }
-    free(namelist);
+    if (n != 1){
+     free(namelist);
+    }
 }   
