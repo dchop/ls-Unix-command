@@ -17,7 +17,7 @@
 #include <grp.h>
 #include "myLs.h"
 
-// Heloper sort function
+// Helper sort function
 char *sortingFunction(char *Arr[], int length){
     char *temp;
     for (int i = 0; i < length; i++){
@@ -141,24 +141,23 @@ int main(int argc, char* args[])
             if(S_ISDIR(dirStat.st_mode)){
                 if(rCheck == 1){
                     optionR(argsArr[i], iCheck, rCheck ,lCheck);
-                        if( i +1 != countArgs){
+                        if( i+1 != countArgs){
                             printf("\n");
                         }
                 }
                 else{
-                        // printf("\n");
-                        // Checking for special characters
-                        if(strstr(argsArr[i], " ") || strstr(argsArr[i], "!") || strstr(argsArr[i], "$") || strstr(argsArr[i], ",") || strstr(argsArr[i], "^") || strstr(argsArr[i], "&") || strstr(argsArr[i], "(") || strstr(argsArr[i], ")")){
-                            printf("\'%s\': \n", argsArr[i]);
-                        }
-                        else{
-                            printf("%s: \n", argsArr[i]);
-                        }
-                        print_dir(argsArr[i], iCheck, lCheck);
-                        if( i +1 != countArgs){
-                            printf("\n");
-                        }
-                    
+                    // printf("\n");
+                    // Checking for special characters
+                    if(strstr(argsArr[i], " ") || strstr(argsArr[i], "!") || strstr(argsArr[i], "$") || strstr(argsArr[i], ",") || strstr(argsArr[i], "^") || strstr(argsArr[i], "&") || strstr(argsArr[i], "(") || strstr(argsArr[i], ")")){
+                        printf("\'%s\': \n", argsArr[i]);
+                    }
+                    else{
+                        printf("%s: \n", argsArr[i]);
+                    }
+                    print_dir(argsArr[i], iCheck, lCheck);
+                    if( i +1 != countArgs){
+                        printf("\n");
+                    }
                 }
             }
         }
@@ -167,6 +166,5 @@ int main(int argc, char* args[])
             exit(1);
         }
     }
-
     return 0;
 }
