@@ -1,5 +1,5 @@
 /**
- * myls.h for Assignment 4, CMPT 300 Summer 2020
+ * myLs.h for Assignment 4, CMPT 300 Summer 2020
  * Name: Devansh Chopra
  * Student #: 301-275-491
  */
@@ -8,6 +8,7 @@
 #define _MYLS_H_
 #include <stdbool.h>
 
+// Function prototypes
 int alphasort(const struct dirent **d1, const struct dirent **d2);
 int checkHidden(char *name);
 void biggestEntry(char *directory);

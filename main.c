@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>	
-#include <unistd.h>
-#include <string.h>
-#include <time.h>
-#include <dirent.h>
 /**
  * main.c for Assignment 4, CMPT 300 Summer 2020
  * Name: Devansh Chopra
@@ -11,11 +5,32 @@
  */
 
 // Header files imported
+#include <stdio.h>
+#include <stdlib.h>	
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <dirent.h>
 #include <ftw.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <grp.h>
 #include "myLs.h"
+
+// Heloper sort function
+char *sortingFunction(char *Arr[], int length){
+    char *temp;
+    for (int i = 0; i < length; i++){
+        for(int j = i+1; j < length; j++){
+            if(strcmp(Arr[i], Arr[j]) > 0){
+                temp = Arr[i];
+                Arr[i] = Arr[j];
+                Arr[j] = temp;
+            }
+        }
+    }
+    return *Arr;
+}
 
 int main(int argc, char* args[])
 {
@@ -23,6 +38,8 @@ int main(int argc, char* args[])
     int iCheck = 0;
     int rCheck = 0;
     int lCheck = 0;
+    char *optionArr[argc];
+    optionArr[0] = args[0];
     char directoryPath[4096];
     int checkOpt;
     int countOptions = 0;
@@ -32,9 +49,8 @@ int main(int argc, char* args[])
     getcwd(directoryPath, sizeof(directoryPath));
 
     int startFile = -1;
-    char *optionArr[argc];
-    optionArr[0] = args[0];
 
+    // Creating the options array
     for (int i = 1; i < argc; i++){
         if(args[i][0] == '-' && (args[i][1] == 'l' || args[i][1] == 'R' || args[i][1] == 'i')){
             optionArr[i] = args[i];
@@ -42,6 +58,7 @@ int main(int argc, char* args[])
         }
         else if(args[i][0] == '-' && (args[i][1] != 'l' || args[i][1] != 'R' || args[i][1] != 'i')){
             printf("Error: Option is invalid\n");
+            exit(1);
         }
         else{
             startFile = i;
@@ -49,16 +66,17 @@ int main(int argc, char* args[])
         }
     }
 
+    // Creating the arguments array
     char *argsArr[argc];
     if(startFile != -1){
-        for(int i = 0; startFile < argc; i++, startFile++){
-            argsArr[i] = args[startFile];
+        for(int j = 0; startFile < argc; j++, startFile++){
+            argsArr[j] = args[startFile];
             countArgs++;
         }
     }
 
     // Checking for the options in the user input
-    while ((checkOpt = getopt(countOptions + 1, optionArr, "iRl")) != -1)
+    while ((checkOpt = getopt(countOptions+1, optionArr, "iRl")) != -1)
         switch (checkOpt) {
             case 'i':
                 iCheck = 1;
@@ -71,13 +89,15 @@ int main(int argc, char* args[])
                 break;
             default:
                 printf("Error: Option is invalid");
-                return 1;
+                exit(1);
     }
 
+    // Special paths
     if(startFile == -1 && rCheck == 0){
         optionL(".", iCheck, lCheck);
     }
 
+    // Special paths
     if (startFile == -1 && rCheck==1){
         optionR(".", iCheck, rCheck, lCheck);
     }
@@ -94,6 +114,7 @@ int main(int argc, char* args[])
         }
     }
 
+    // Printing the files first
     int countOfFiles = 0;
     for (int i = 0; i < countArgs; i++){
         int t = lstat(argsArr[i], &dirStat);
@@ -105,7 +126,7 @@ int main(int argc, char* args[])
         }
         else{
             printf("Error: invalid access\n");
-            return 2;
+            exit(1);
         }
     }
 
@@ -113,6 +134,7 @@ int main(int argc, char* args[])
         printf("\n");
     }
 
+    // Printing the dirs second
     for (int i = 0; i < countArgs; i++){
         int t = lstat(argsArr[i], &dirStat);
         if (t != -1){
@@ -125,6 +147,7 @@ int main(int argc, char* args[])
                 }
                 else{
                         // printf("\n");
+                        // Checking for special characters
                         if(strstr(argsArr[i], " ") || strstr(argsArr[i], "!") || strstr(argsArr[i], "$") || strstr(argsArr[i], ",") || strstr(argsArr[i], "^") || strstr(argsArr[i], "&") || strstr(argsArr[i], "(") || strstr(argsArr[i], ")")){
                             printf("\'%s\': \n", argsArr[i]);
                         }
@@ -141,7 +164,7 @@ int main(int argc, char* args[])
         }
         else{
             printf("Error: invalid access\n");
-            return 2;
+            exit(1);
         }
     }
 
