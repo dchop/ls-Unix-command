@@ -2,6 +2,7 @@
 #define _MYLS_H_
 #include <stdbool.h>
 
+int alphasort(const struct dirent **d1, const struct dirent **d2);
 int checkHidden(char *name);
 void biggestEntry(char *directory);
 void printPermissions(__mode_t newMode);

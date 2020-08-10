@@ -16,62 +16,46 @@ int main(int argc, char* args[])
     int rCheck = 0;
     int lCheck = 0;
     char directoryPath[4096];
-    int optionChecker;
+    int checkOpt;
+    int countOptions = 0;
+    int countArgs = 0;
     struct stat dirStat;
 
     getcwd(directoryPath, sizeof(directoryPath));
 
-    char *temp1;
-    char* tempArr[argc];
-    char* toPrintDirsFirst[argc];
-    int j = 0;
+    // char *temp1;
+    // char* tempArr[argc];
+    // char* toPrintDirsFirst[argc];
+    // int j = 0;
 
-    // for (int i = 0; i < argc; i++){
-    //     char temFile[4096];
-    //     strcpy(temFile, args[i]);
-    //     strcat(temFile, "\0");
-    //     lstat(temFile, &dirStat);
+    int startFile = -1;
+    char *optionArr[argc];
+    optionArr[0] = args[0];
 
-    //     if (dirStat.st_mode & S_IFDIR){
-    //         continue;
-    //     }
-    //     else{
-    //         toPrintDirsFirst[i] = args[i];
-    //     }
-    //     j++;
-    // }
-    // for (int i = 0; i < argc; i++){
-    //     char temFile1[4096];
-    //     strcpy(temFile1, args[i]);
-    //     strcat(temFile1, "\0");
-    //     lstat(temFile1, &dirStat);
-    //     if (dirStat.st_mode & S_IFDIR){
-    //         toPrintDirsFirst[j] = args[i];
-    //         j++;
-    //     }
-    //     else{
-    //         continue;
-    //     }
-    // }
-
-
-    for (int i = 0; i < argc; i++){
-        if(args[i][0] == '-' && args[i][1] != 'l' && args[i][1] != 'R' && args[i][1] != 'i'){
-            temp1 = malloc(strlen(args[i]) + 3);
-            strcpy(temp1, args[i]);
-            size_t len = strlen("./");
-            memmove(temp1 + len, temp1, strlen(temp1) +1);
-            memcpy(temp1, "./", len);
-            tempArr[i] = temp1;
+    for (int i = 1; i < argc; i++){
+        if(args[i][0] == '-' && (args[i][1] == 'l' || args[i][1] == 'R' || args[i][1] == 'i')){
+            optionArr[i] = args[i];
+            countOptions++;
+        }
+        else if(args[i][0] == '-' && (args[i][1] != 'l' || args[i][1] != 'R' || args[i][1] != 'i')){
+            printf("Error: Option is invalid\n");
         }
         else{
-            tempArr[i] = args[i];
+            startFile = i;
+            break;
         }
     }
-    // free(temp1);
 
-    while ((optionChecker = getopt(argc, tempArr, "iRl")) != -1)
-        switch (optionChecker) {
+    char *argsArr[argc];
+    if(startFile != -1){
+        for(int i = 0; startFile < argc; i++, startFile++){
+            argsArr[i] = args[startFile];
+            countArgs++;
+        }
+    }
+
+    while ((checkOpt = getopt(countOptions + 1, optionArr, "iRl")) != -1)
+        switch (checkOpt) {
             case 'i':
                 iCheck = 1;
                 break;
@@ -82,23 +66,94 @@ int main(int argc, char* args[])
                 lCheck = 1;
                 break;
             default:
+                printf("Error: Option is invalid");
                 return 1;
     }
 
-    if (optind == argc && rCheck == 1){
+    if(startFile == -1 && rCheck == 0){
+        optionL(".", iCheck, lCheck);
+    }
+
+    if (startFile == -1 && rCheck==1){
         optionR(".", iCheck, rCheck, lCheck);
     }
-    else if(optind == argc){
-            optionL(".", iCheck, lCheck);
-        }
-    for (; optind < argc; optind++) {
-        if (rCheck == 1){
-            optionR(args[optind], iCheck, rCheck, lCheck);
-        }
-        else{
-            optionL(args[optind], iCheck, lCheck);
+
+    char *temp;
+    for (int i = 0; i < countArgs; i++){
+        for(int j = i+1; j < countArgs; j++){
+            if(strcmp(argsArr[i], argsArr[j]) > 0){
+                temp = argsArr[i];
+                argsArr[i] = argsArr[j];
+                argsArr[j] = temp;
+            }
         }
     }
+
+    int countOfFiles = 0;
+    for (int i = 0; i < countArgs; i++){
+        int t = lstat(argsArr[i], &dirStat);
+        if (t != -1){
+            if(!(S_ISDIR(dirStat.st_mode))){
+                optionL(argsArr[i], iCheck, lCheck);
+                countOfFiles++;
+            }
+        }
+        else{
+            printf("Error: invalid access\n");
+            return 2;
+        }
+    }
+
+    if (countOfFiles < countArgs){
+        printf("\n");
+    }
+
+    for (int i = 0; i < countArgs; i++){
+        int t = lstat(argsArr[i], &dirStat);
+        if (t != -1){
+            if(S_ISDIR(dirStat.st_mode)){
+                if(rCheck == 1){
+                    optionR(argsArr[i], iCheck, rCheck ,lCheck);
+                        if( i +1 != countArgs){
+                            printf("\n");
+                        }
+                }
+                else{
+                        // printf("\n");
+                        if(strstr(argsArr[i], " ") || strstr(argsArr[i], "!") || strstr(argsArr[i], "$") || strstr(argsArr[i], ",") || strstr(argsArr[i], "^") || strstr(argsArr[i], "&") || strstr(argsArr[i], "(") || strstr(argsArr[i], ")")){
+                            printf("\'%s\': \n", argsArr[i]);
+                        }
+                        else{
+                            printf("%s: \n", argsArr[i]);
+                        }
+                        print_dir(argsArr[i], iCheck, lCheck);
+                        if( i +1 != countArgs){
+                            printf("\n");
+                        }
+                    
+                }
+            }
+        }
+        else{
+            printf("Error: invalid access\n");
+            return 2;
+        }
+    }
+
+    // if (optind == argc && rCheck == 1){
+    //     optionR(".", iCheck, rCheck, lCheck);
+    // }
+    // else if(optind == argc){
+    //         optionL(".", iCheck, lCheck);
+    //     }
+    // for (; optind < argc; optind++) {
+    //     if (rCheck == 1){
+    //         optionR(args[optind], iCheck, rCheck, lCheck);
+    //     }
+    //     else{
+    //         optionL(args[optind], iCheck, lCheck);
+    //     }
+    // }
 
     return 0;
 }
