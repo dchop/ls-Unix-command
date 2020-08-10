@@ -4,6 +4,13 @@
 #include <string.h>
 #include <time.h>
 #include <dirent.h>
+/**
+ * main.c for Assignment 4, CMPT 300 Summer 2020
+ * Name: Devansh Chopra
+ * Student #: 301-275-491
+ */
+
+// Header files imported
 #include <ftw.h>
 #include <sys/types.h>
 #include <pwd.h>
@@ -12,6 +19,7 @@
 
 int main(int argc, char* args[])
 {
+    // Helper variables
     int iCheck = 0;
     int rCheck = 0;
     int lCheck = 0;
@@ -22,11 +30,6 @@ int main(int argc, char* args[])
     struct stat dirStat;
 
     getcwd(directoryPath, sizeof(directoryPath));
-
-    // char *temp1;
-    // char* tempArr[argc];
-    // char* toPrintDirsFirst[argc];
-    // int j = 0;
 
     int startFile = -1;
     char *optionArr[argc];
@@ -54,6 +57,7 @@ int main(int argc, char* args[])
         }
     }
 
+    // Checking for the options in the user input
     while ((checkOpt = getopt(countOptions + 1, optionArr, "iRl")) != -1)
         switch (checkOpt) {
             case 'i':
@@ -79,6 +83,7 @@ int main(int argc, char* args[])
     }
 
     char *temp;
+    // Sorting the input arguments
     for (int i = 0; i < countArgs; i++){
         for(int j = i+1; j < countArgs; j++){
             if(strcmp(argsArr[i], argsArr[j]) > 0){
@@ -139,21 +144,6 @@ int main(int argc, char* args[])
             return 2;
         }
     }
-
-    // if (optind == argc && rCheck == 1){
-    //     optionR(".", iCheck, rCheck, lCheck);
-    // }
-    // else if(optind == argc){
-    //         optionL(".", iCheck, lCheck);
-    //     }
-    // for (; optind < argc; optind++) {
-    //     if (rCheck == 1){
-    //         optionR(args[optind], iCheck, rCheck, lCheck);
-    //     }
-    //     else{
-    //         optionL(args[optind], iCheck, lCheck);
-    //     }
-    // }
 
     return 0;
 }

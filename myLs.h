@@ -1,3 +1,9 @@
+/**
+ * myls.h for Assignment 4, CMPT 300 Summer 2020
+ * Name: Devansh Chopra
+ * Student #: 301-275-491
+ */
+
 #ifndef _MYLS_H_
 #define _MYLS_H_
 #include <stdbool.h>

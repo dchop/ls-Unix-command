@@ -1,3 +1,10 @@
+/**
+ * myls.c for Assignment 4, CMPT 300 Summer 2020
+ * Name: Devansh Chopra
+ * Student #: 301-275-491
+ */
+
+// Header files imported
 #include <stdio.h>
 #include <stdlib.h>	
 #include <unistd.h>
@@ -14,12 +21,15 @@
 #include <libgen.h>
 #include "myLs.h"
 
+// Built in alphasort to be used in scandir
 int alphasort(const struct dirent **d1, const struct dirent **d2);
 
+// Helper variables
 static int width1 = 0;
 static int width2 = 0;
 static int maxNodeCount = 0;
 
+// Function that checks for all hidden files
 int checkHidden(char *name){
     if(!strcmp(name, ".") || !strcmp(name, ".")){
         return 1;
@@ -32,6 +42,7 @@ int checkHidden(char *name){
     }
 }
 
+// Function that sets the formatting widths for printing
 void biggestEntry(char *directory){
 
     DIR *dir;
@@ -99,6 +110,7 @@ void biggestEntry(char *directory){
     return;
 }
 
+// Function for printing the permissions for a file/directory
 void printPermissions(__mode_t newMode){
     if ((newMode & S_IRUSR) == S_IRUSR){
         printf("r");
@@ -140,6 +152,7 @@ void printPermissions(__mode_t newMode){
     else {printf("-");}
 }
 
+// Function for printing the file type of a file
 char fileType(__mode_t newMode){
     switch(newMode & S_IFMT){
         case S_IFCHR:
@@ -169,6 +182,7 @@ char fileType(__mode_t newMode){
     }
 }
 
+// Function that takes care of ., .. and ~ directories
 void optionL(char *directory, int iCheck, int lCheck){
 
     char temp[4096] = {'\0'};
@@ -219,10 +233,12 @@ void optionL(char *directory, int iCheck, int lCheck){
                 }
                 grp = getgrgid(curStat.st_gid);
 
+                // When the options are -i and -l
                 if (iCheck == 1 && lCheck == 1){
                     printf("%*llu ", maxNodeCount, curStat.st_ino);
                     char k = fileType(curStat.st_mode);
                     if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
+                        // Checking for symlinks
                         if( k == 'l'){
                             readlink(file, symbolic_link, 1024);
                             printPermissions(curStat.st_mode);
@@ -242,6 +258,7 @@ void optionL(char *directory, int iCheck, int lCheck){
                         }
                     }
                     else{
+                        // Checking for symlinks
                         if( k == 'l'){
                             readlink(file, symbolic_link, 1024);
                             printPermissions(curStat.st_mode);
@@ -261,6 +278,7 @@ void optionL(char *directory, int iCheck, int lCheck){
                         }
                     }
                 }
+                // When the option is -i
                 else if (iCheck == 1){
                     if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
                         printf("%*llu \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[j]->d_name);
@@ -271,9 +289,11 @@ void optionL(char *directory, int iCheck, int lCheck){
                         strcpy(temp, "");
                     }
                 }
+                // When the option is -l
                 else if (lCheck == 1){
                     char k = fileType(curStat.st_mode);
                     if (strstr(namelist[j]->d_name, " ") || strstr(namelist[j]->d_name, "!") || strstr(namelist[j]->d_name, "$") || strstr(namelist[j]->d_name, ",") || strstr(namelist[j]->d_name, "^") || strstr(namelist[j]->d_name, "&") || strstr(namelist[j]->d_name, "(") || strstr(namelist[j]->d_name, ")")){
+                        // Checking for symlinks
                         if (k == 'l'){ 
                             readlink(file, symbolic_link, 1024);                                          
                             printPermissions(curStat.st_mode);
@@ -294,6 +314,7 @@ void optionL(char *directory, int iCheck, int lCheck){
                         }
                     }
                     else{
+                        // Checking for symlinks
                         if (k == 'l'){
                             readlink(file, symbolic_link, 1024);
                             printPermissions(curStat.st_mode);
@@ -329,10 +350,10 @@ void optionL(char *directory, int iCheck, int lCheck){
         
         if (n == -1){
             printSingleFile(directory, iCheck, lCheck);
-        }
-        
+        }      
 } 
 
+// Function for printing a single file and its meta data
 void printSingleFile(char *directory, int iCheck, int lCheck){
     char temp[4096];
     char timeBuff[50];
@@ -366,10 +387,12 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
             }
             grp = getgrgid(curStat.st_gid);
 
+            // When the options are -i and -l
             if (iCheck == 1 && lCheck == 1){
                 printf("%*llu ", maxNodeCount, curStat.st_ino);
                 char k = fileType(curStat.st_mode);
                 if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
+                    // Checking for symlinks
                     if(k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -390,6 +413,7 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
                     }
                 }
                 else{
+                    // Checking for symlinks
                     if(k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -410,6 +434,7 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
                     } 
                 }
             }
+            // When the option is -i
             else if (iCheck == 1){
                 if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
                     printf("%*llu \'%s\'  \n", maxNodeCount, curStat.st_ino, directory);
@@ -420,9 +445,11 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
                     strcpy(temp, "");
                 }   
             }
+            // When the option is -l
             else if (lCheck == 1){
                 char k = fileType(curStat.st_mode);
                 if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
+                   // Checking for symlinks
                     if(k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -442,6 +469,7 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
                     }
                 }
                 else{
+                    // Checking for symlinks
                     if(k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -472,6 +500,7 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
             }
 }
 
+// Function for printing contents of a directory
 void print_dir(char *directory, int iCheck, int lCheck){
     struct stat curStat;
     struct dirent **namelist;
@@ -528,10 +557,12 @@ void print_dir(char *directory, int iCheck, int lCheck){
                 }
                 grp = getgrgid(curStat.st_gid);
 
+            // When the options are -i and -l
             if (iCheck == 1 && lCheck == 1){
                 printf("%*llu ", maxNodeCount, curStat.st_ino);
                 char k = fileType(curStat.st_mode);
                 if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
+                    // Checking for symlinks
                     if( k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -551,6 +582,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
                     }
                 }
                 else{
+                    // Checking for symlinks
                     if( k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -570,6 +602,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
                     }
                 }
             }
+            // When the option is -i
             else if (iCheck == 1){
                 if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
                     printf("%*llu \'%s\'  \n", maxNodeCount, curStat.st_ino, namelist[i]->d_name);
@@ -580,9 +613,11 @@ void print_dir(char *directory, int iCheck, int lCheck){
                     strcpy(temp, "");
                 }
             }
+            // When the option is -l
             else if (lCheck == 1){
                 char k = fileType(curStat.st_mode);
                 if (strstr(namelist[i]->d_name, " ") || strstr(namelist[i]->d_name, "!") || strstr(namelist[i]->d_name, "$") || strstr(namelist[i]->d_name, ",") || strstr(namelist[i]->d_name, "^") || strstr(namelist[i]->d_name, "&") || strstr(namelist[i]->d_name, "(") || strstr(namelist[i]->d_name, ")")){
+                    // Checking for symlinks
                     if (k == 'l'){ 
                         readlink(file, symbolic_link, 1024);                                          
                         printPermissions(curStat.st_mode);
@@ -602,6 +637,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
                     }
                 }
                 else{
+                    // Checking for symlinks
                     if (k == 'l'){
                         readlink(file, symbolic_link, 1024);
                         printPermissions(curStat.st_mode);
@@ -640,6 +676,7 @@ void print_dir(char *directory, int iCheck, int lCheck){
    
 }
 
+// Function for printing all directories recursively
 void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     
     if (strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
