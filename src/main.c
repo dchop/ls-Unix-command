@@ -130,7 +130,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if (countOfFiles < countArgs){
+    if (countOfFiles < countArgs && countOfFiles != 0){
         printf("\n");
     }
 
@@ -146,17 +146,9 @@ int main(int argc, char* args[])
                         }
                 }
                 else{
-                    // printf("\n");
-                    // Checking for special characters
-                    if(strstr(argsArr[i], " ") || strstr(argsArr[i], "!") || strstr(argsArr[i], "$") || strstr(argsArr[i], ",") || strstr(argsArr[i], "^") || strstr(argsArr[i], "&") || strstr(argsArr[i], "(") || strstr(argsArr[i], ")")){
-                        printf("\'%s\': \n", argsArr[i]);
-                    }
-                    else{
-                        printf("%s: \n", argsArr[i]);
-                    }
-                    print_dir(argsArr[i], iCheck, lCheck);
+                    printingDir(argsArr[i], iCheck, lCheck);
                     if( i +1 != countArgs){
-                        printf("\n");
+                    printf("\n");
                     }
                 }
             }

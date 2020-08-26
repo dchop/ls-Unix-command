@@ -1,20 +1,30 @@
-all: clean output
+CFLAGS = -g -W -Wall -Wpedantic
+MAIN = ./src/main.c
+MYLS = ./src/myLs.c
+INC = -I include
+BIN = bin/myls
 
-output: myLs.o main.o
-	gcc -g -W -Wall -Wpedantic myLs.o main.o -o myls
+all: clean build
 
-main.o: main.c
-	gcc -c -g -W -Wall -Wpedantic main.c
+build: myLs.o main.o
+	@mkdir -p bin
+	gcc $(CFLAGS) myLs.o main.o -o $(BIN)
 
-myLs.o: myLs.c
-	gcc -c -g -W -Wall -Wpedantic myLs.c
+main.o: $(MAIN)
+	gcc -c $(CFLAGS) $(INC)  $(MAIN)
 
-valgrind: output
+myLs.o: $(MYLS)
+	gcc -c $(CFLAGS) $(INC) $(MYLS)
+
+mem: clean build mem-check
+
+mem-check: 
+	@mkdir -p bin
 	 valgrind -s --leak-check=full \
 			 --show-leak-kinds=all \
 			 --track-origins=yes \
 			 --show-reachable=yes \
-			 ./myls -ilR Test/
+			 ./$(BIN) -ilR
 			 
 clean:
-	rm -f *.o* myls
+	rm -f *.o* *.out* ./$(BIN)

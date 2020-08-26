@@ -204,15 +204,6 @@ void optionL(char *directory, int iCheck, int lCheck){
     struct dirent **namelist;
     int n = 0;
     n = scandir(directory, &namelist, 0, alphasort);
-
-        // if(n != -1){
-        //     if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
-        //         printf("\'%s\': \n", directory);
-        //     }
-        //     else{
-        //     printf("%s: \n", directory);
-        //     }
-        // }
         
     for (int j = 0; j<n; j++){
         // Skipping the hidden files
@@ -227,9 +218,8 @@ void optionL(char *directory, int iCheck, int lCheck){
         strcat(stub, "\0");
 
         if(lstat(stub, &curStat)==-1){
-            printf("Error in print_dir on file: [%s]\n", stub);
-            printf("%s\n", strerror(errno));
-            return 1;
+            printf("Error: cannot access file/dir or error in file/dir\n");
+            exit(1);
         }
 
         // Creating the time buffer
@@ -390,9 +380,8 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
     strcat(stub, "\0");
 
     if(lstat(stub, &curStat)==-1){
-        printf("Error in print_dir on file: [%s]\n", stub);
-        printf("%s\n", strerror(errno));
-        return 1;
+        printf("Error: cannot access file or error in file\n");
+        exit(1);
     }
 
     // Setting up time buffer
@@ -525,7 +514,7 @@ void printSingleFile(char *directory, int iCheck, int lCheck){
 }
 
 // Function for printing contents of a directory
-void print_dir(char *directory, int iCheck, int lCheck){
+void printingDir(char *directory, int iCheck, int lCheck){
 
     // Local variables
     struct stat curStat;
@@ -541,14 +530,14 @@ void print_dir(char *directory, int iCheck, int lCheck){
     char symbolic_link[1024] = {'\0'};
     pwd = getpwuid(getuid());
     biggestEntry(directory);
+    int printDirName = 0;
     n = scandir(directory, &namelist, NULL, alphasort);
+
 
     if (n < 0){
         if(lstat(directory, &dirStat) == -1){
-            printf("Error in print_dir on file");
-        }
-        else{
-            printf("%lu\t%s\n ", dirStat.st_size, directory);
+            printf("Error: cannot access file/dir or error in file/dir\n");
+            exit(1);
         }
     }
     else{
@@ -563,6 +552,17 @@ void print_dir(char *directory, int iCheck, int lCheck){
                     continue;
             }
 
+            if (printDirName == 0){
+                if(strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
+                    printf("\'%s\': \n", directory);
+                    printDirName = 1;
+                }
+                else{
+                    printf("%s: \n", directory);
+                    printDirName = 1;
+                }
+            }
+
             char stub[4096];
             strcpy(stub, directory);
             if(strcmp("/", directory)){
@@ -572,9 +572,8 @@ void print_dir(char *directory, int iCheck, int lCheck){
             strcat(stub, "\0");
 
             if(lstat(stub, &curStat)==-1){
-                printf("Error in print_dir on file: [%s]\n", stub);
-                printf("%s\n", strerror(errno));
-                return 1;
+                printf("Error: cannot access file/dir or error in file/dir\n");
+                exit(1);
             }
 
             curTimer = curStat.st_mtime;
@@ -711,16 +710,8 @@ void print_dir(char *directory, int iCheck, int lCheck){
 
 // Function for printing all directories recursively
 void optionR(char *directory, int iCheck, int rCheck, int lCheck){
-    
-    // Checking for special characters
-    if (strstr(directory, " ") || strstr(directory, "!") || strstr(directory, "$") || strstr(directory, ",") || strstr(directory, "^") || strstr(directory, "&") || strstr(directory, "(") || strstr(directory, ")")){
-        printf("\'%s\': \n", directory);
-    }
-    else{
-        printf("%s: \n", directory);
-    }
 
-    print_dir(directory, iCheck, lCheck);
+    printingDir(directory, iCheck, lCheck);
     struct dirent **namelist;
     struct stat stat_struct;
     int n = 0;
@@ -728,10 +719,8 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
     
     if (n < 0){
         if(lstat(directory, &stat_struct) == -1){
-            printf("Error in print_dir on file");
-        }
-        else{
-            printf("%lu\t%s\n ", stat_struct.st_size, directory);
+            printf("Error: cannot access file/dir or error in file/dir\n");
+            exit(1);
         }
     }
 
@@ -757,10 +746,9 @@ void optionR(char *directory, int iCheck, int rCheck, int lCheck){
         strcat(stub, "\0");
 
         if(lstat(stub, &stat_struct)==-1){
-            printf("Error in print_dir on file: [%s]\n", stub);
-            printf("%s\n", strerror(errno));
+            printf("Error: cannot access file/dir or error in file/dir\n");
             free(namelist[i]);
-            return 1;
+            exit(1);
         }
         
         // Check if its a directory and do recursion
